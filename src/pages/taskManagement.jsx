@@ -190,10 +190,17 @@ function TaskManagement() {
   };
 
   useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredTasks(originalTasks);
+      setShowFilteredTasks(false); 
+      return;
+    } 
+
     const filteredTasks = originalTasks.filter(task =>
       task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
     setFilteredTasks(filteredTasks);
     setShowFilteredTasks(true);
   }, [searchQuery, originalTasks]);
