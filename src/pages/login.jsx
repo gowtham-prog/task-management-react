@@ -53,7 +53,7 @@ export default function Login() {
 
         try {
             const formData = new FormData();
-            formData.append('username', email);
+            formData.append('email', email);
             formData.append('password', password);
 
             await loginUser(formData);
@@ -66,19 +66,19 @@ export default function Login() {
 
     const loginUser = async (formData) => {
         try {
-            const response = await axios.post(`${SERVER_URL}/api/token/`, formData, {
+            const response = await axios.post(`${SERVER_URL}/login/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             console.log("status:", response)
-            const { access, refresh } = response.data;
-            console.log('Access token received:', access);
+            const { token, user } = response.data;
+            console.log('Access token received:', token);
             localStorage.clear();
             sessionStorage.clear();
-            localStorage.setItem('accessToken', access);
-            localStorage.setItem('refreshToken', refresh);
+            localStorage.setItem('accessToken', token);
+            localStorage.setItem('user', user);
             isAuthenticated().then(r => {
             });
             // fetchUserData(access).then(r => {
@@ -98,7 +98,7 @@ export default function Login() {
 
     const registerUser = async (formData) => {
         try {
-            const response = await axios.post(`${SERVER_URL}/api/v1/user/create/`, formData, {
+            const response = await axios.post(`${SERVER_URL}/signup/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -113,7 +113,7 @@ export default function Login() {
         } catch (error) {
             console.error('Error while registering user:', error.response.data.message);
             setShowError(true)
-            setErrorMessage(error.response.data.message)
+            setErrorMessage(error?.message || "Unable to create an account.")
             throw error
         }
     };
@@ -152,7 +152,7 @@ export default function Login() {
             if (profile) {
                 try {
                     const loginFormData = new FormData();
-                    loginFormData.append('username', profile.email);
+                    loginFormData.append('email', profile.email);
                     loginFormData.append('password', profile.id);
 
                     await loginUser(loginFormData);
@@ -162,11 +162,8 @@ export default function Login() {
                         // User does not exist, attempt to register
                         try {
                             const registerFormData = new FormData();
-                            const baseUsername = profile.given_name.replace(/[^a-zA-Z0-9@/./+/-/_]/g, '');
-                            const uniqueUsername = `${baseUsername}${Date.now()}`;
-                            registerFormData.append('username', uniqueUsername);
-                            registerFormData.append('first_name', profile.given_name);
-                            registerFormData.append('last_name', profile.family_name);
+                            registerFormData.append('firstName', profile.given_name);
+                            registerFormData.append('lastName', profile.family_name);
                             registerFormData.append('email', profile.email);
                             registerFormData.append('password', profile.id);
 
@@ -174,18 +171,18 @@ export default function Login() {
 
                             // Now try to login again
                             const loginFormData2 = new FormData();
-                            loginFormData2.append('username', profile.email);
+                            loginFormData2.append('email', profile.email);
                             loginFormData2.append('password', profile.id);
                             await loginUser(loginFormData2);
                         } catch (registerError) {
                             console.error('Error while registering user:', registerError?.response?.data?.message);
                             setShowError(true)
-                            setErrorMessage(registerError?.response?.data?.message)
+                            setErrorMessage(registerError?.message || registerError?.error || "Error while registering user")
                         }
                     } else {
                         console.error('Error while logging in user:', loginError?.response?.data?.message);
                         setShowError(true)
-                        setErrorMessage(loginError?.response?.data?.message)
+                        setErrorMessage(loginError?.message|| loginError?.error || "Error while logging in user")
                     }
                 }
             }
@@ -213,7 +210,7 @@ export default function Login() {
                             <InputField type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                             <Button name="Login" click={(e) => handleUserLogin(e)} />
                             <span className='text-black text-center my-4'>Don't have an account? <a className='font-semibold text-blue-600' href="/signup">Signup</a></span>
-                            <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:text-blue-600 hover:bg-white" onClick={() => googleAuthLogin()}>Login with <strong>Google</strong></button>
+                            <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:bg-blue-600 hover:bg-white" onClick={() => googleAuthLogin()}>Login with <strong>Google</strong></button>
                             {showError ? (
                                 <p className="mt-4 text-sm text-red-600 dark:text-red-400 text-center">{errorMessage}</p>
                             ) :

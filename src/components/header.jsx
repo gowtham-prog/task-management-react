@@ -20,7 +20,7 @@ export default function Header({ authenticated }) {
 
                     {authenticated ?
                         <div className="w-2/3 h-full hidden md:flex flex-row items-center text-xl justify-end font-semibold">
-                            <HeaderButton name="tasks" route="/" />
+                            {/* <HeaderButton name="tasks" route="/" /> */}
                             <button className="px-5 py-2 rounded-md text-white bg-red-400 hover:bg-red-600" onClick={() => logoutUser()}>Logout</button>
                         </div>
                         :

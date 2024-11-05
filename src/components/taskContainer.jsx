@@ -1,19 +1,20 @@
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import Task from './task';
-
+import noTask from '../assets/noTask.png';
 const ItemType = {
     TASK: 'task',
 };
 
-export default function TaskContainer({ status, tasks, moveTask }) {
+export default function TaskContainer({ status, tasks, moveTask, triggerFetch}) { 
     const filteredTasks = tasks.filter((task) => task.status === status);
 
     const [, dropRef] = useDrop({
         accept: ItemType.TASK,
         drop(draggedItem) {
+            console.log("dropped", draggedItem)
             // Handle dropping into an empty container or a new container
             if (draggedItem.currentStatus !== status) {
-                moveTask(draggedItem.index, filteredTasks.length, status, draggedItem.currentStatus);
+                moveTask(draggedItem.index, filteredTasks.length, status, draggedItem.currentStatus,draggedItem.id);
                 draggedItem.currentStatus = status;
             }
         },
@@ -26,10 +27,15 @@ export default function TaskContainer({ status, tasks, moveTask }) {
             </div>
             {filteredTasks.length > 0 ? (
                 filteredTasks.map((task, index) => (
-                    <Task key={task.id} task={task} index={index} moveTask={moveTask} />
+                    <Task key={task.id} task={task} index={index} moveTask={moveTask} triggerFetch={triggerFetch}/>
                 ))
             ) : (
-                <p className="text-gray-500 italic">Drop tasks here</p>
+                <div className='flex flex-col w-full h-full items-center justify-center'>
+                    <div className='flex flex-col w-full h-fit items-center '>
+                        <p className="text-gray-500 italic text-center">Drop tasks here</p>
+                        <img src={noTask} alt="noTask" className="w-1/2 h-auto " />
+                    </div>
+                </div>
             )}
         </div>
     );

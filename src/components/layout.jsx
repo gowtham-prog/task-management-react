@@ -25,7 +25,7 @@ export default function Layout({ children }) {
             <Header authenticated={authenticated} />
             <div className="flex items-center justify-center w-full h-full ">
                 <div className="flex items-center justify-center  h-full w-full">
-                    <div className="flex w-full h-[calc(100vh-4rem)] backdrop-blur-lg rounded-xl items-center justify-center">
+                    <div className="flex w-full min-h-[calc(100vh-4rem)] h-full backdrop-blur-lg rounded-xl items-center justify-center">
                         {children}
                     </div>
                 </div>
