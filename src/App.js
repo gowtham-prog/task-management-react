@@ -7,10 +7,9 @@ import TaskManagement from "./pages/taskManagement";
 function App() {
   return (
     <Routes >
-      <Route path="/this" element={<div>hello</div>} />
+      <Route path="/" element={<TaskManagement />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/tasks" element={<TaskManagement />} />
     </Routes>
   );
 }

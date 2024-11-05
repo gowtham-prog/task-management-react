@@ -1,5 +1,5 @@
-import HeaderButton from "./headerButton"
 import { useNavigate } from "react-router-dom";
+import HeaderButton from "./headerButton";
 export default function Header({ authenticated }) {
 
     const navigate = useNavigate();
@@ -20,13 +20,13 @@ export default function Header({ authenticated }) {
 
                     {authenticated ?
                         <div className="w-2/3 h-full hidden md:flex flex-row items-center text-xl justify-end font-semibold">
-                            <HeaderButton name="login" route="/login"/>
-                            <HeaderButton name="signup" route="/signup"/>
+                            <HeaderButton name="tasks" route="/" />
+                            <button className="px-5 py-2 rounded-md text-white bg-red-400 hover:bg-red-600" onClick={() => logoutUser()}>Logout</button>
                         </div>
                         :
                         <div className="w-2/3 h-full hidden md:flex flex-row items-center text-xl justify-end font-semibold">
-                            <HeaderButton name="tasks" route="/tasks"/>
-                            <button className="px-5 py-2 rounded-md text-white bg-red-400 hover:bg-red-600" onClick={() => logoutUser()}>Logout</button>  
+                            <HeaderButton name="login" route="/login" />
+                            <HeaderButton name="signup" route="/signup" />
                         </div>
                     }
                 </div>

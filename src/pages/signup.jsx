@@ -1,15 +1,34 @@
-import React, { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom';
-import Layout from '../components/layout';
-import InputField from '../components/inputField';
-import Button from '../components/Button';
-import { useAuthentication } from '../Authentication';
-import { SERVER_URL } from "../config";
 import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuthentication } from '../Authentication';
+import Button from '../components/Button';
+import InputField from '../components/inputField';
+import Layout from '../components/layout';
+import { SERVER_URL } from "../config";
+import { googleLogout, useGoogleLogin } from '@react-oauth/google';
+
 
 
 export default function Signup() {
-    const authenticated = localStorage.getItem('authenticated');
+    const [authenticated, setAuthenticated] = useState(null);
+    const { isAuthenticated } = useAuthentication();
+
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            const result = await isAuthenticated();
+            setAuthenticated(result);
+        };
+
+        checkAuthentication();
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        if (authenticated) {
+            window.location.href = '/';
+        }
+    }, [authenticated]);
+    
     const navigate = useNavigate();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -18,7 +37,7 @@ export default function Signup() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const { isAuthenticated } = useAuthentication();
+    // const { isAuthenticated } = useAuthentication();
     const location = useLocation();
 
     const handleUserSingup = (e) => {
@@ -113,7 +132,7 @@ export default function Signup() {
             if (location.state !== null) {
                 navigate(location.state.path)
             } else {
-                navigate("/tasks");
+                navigate("/");
             }
         } catch (error) {
             setErrorMessage("Invalid username or password")
@@ -122,13 +141,95 @@ export default function Signup() {
         }
     };
 
+    const [ user, setUser ] = useState([]);
+    const [ profile, setProfile ] = useState([]);
+
+    const googleAuthSignup = useGoogleLogin({
+        onSuccess: (codeResponse) => setUser(codeResponse),
+        onError: (error) => console.log('Login Failed:', error)
+    });
+
+    useEffect(
+        () => {
+            if (user) {
+                axios
+                    .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
+                        headers: {
+                            Authorization: `Bearer ${user.access_token}`,
+                            Accept: 'application/json'
+                        }
+                    })
+                    .then((res) => {
+                        setProfile(res.data);
+                        console.log("data from gooogelogin", res.data)
+                    })
+                    .catch((err) => console.log(err));
+            }
+        },
+        [ user ]
+    );
+
+    useEffect(() => {
+        const registerOrLogin = async () => {
+            if (profile) {
+                try {
+                    const loginFormData = new FormData();
+                    loginFormData.append('username', profile.email);
+                    loginFormData.append('password', profile.id);
+
+                    await loginUser(loginFormData);
+
+                } catch (loginError) {
+                    console.log(loginError.response)
+                    if (loginError.response && loginError.response.status === 401) {
+                        // User does not exist, attempt to register
+                        try {
+                            const registerFormData = new FormData();
+                            const baseUsername = profile.given_name.replace(/[^a-zA-Z0-9@/./+/-/_]/g, '');
+                            const uniqueUsername = `${baseUsername}${Date.now()}`;
+                            registerFormData.append('username', uniqueUsername);
+                            registerFormData.append('first_name', profile.given_name);
+                            registerFormData.append('last_name', profile.family_name);
+                            registerFormData.append('email', profile.email);
+                            registerFormData.append('password', profile.id);
+
+                            await registerUser(registerFormData);
+
+                            // Now try to login again
+                            const loginFormData2 = new FormData();
+                            loginFormData2.append('username', profile.email);
+                            loginFormData2.append('password', profile.id);
+                            await loginUser(loginFormData2);
+                        } catch (registerError) {
+                            console.error('Error while registering user:', registerError?.response?.data?.message);
+                            setShowError(true)
+                            setErrorMessage(registerError?.response?.data?.message)
+                        }
+                    } else {
+                        console.error('Error while logging in user:', loginError?.response?.data?.message);
+                        setShowError(true)
+                        setErrorMessage(loginError?.response?.data?.message)
+                    }
+                }
+            }
+        };
+
+        registerOrLogin();
+    }, [profile]);
+
+    const logOut = () => {
+        googleLogout();
+        setProfile(null);
+    };
+
+
     return (
         <Layout>
             {
                 authenticated ?
                     navigate('/dashboard')
                     :
-                    <div className='flex flex-col md:w-1/3 h-full md:h-1/2 justify-center'>
+                    <div className='flex flex-col md:w-1/3 h-full md:h-1/2 justify-center max-w-7xl'>
                         <span className='text-5xl font-bold text-blue-600 text-left pb-8'>Sign in</span>
                         <div className='flex flex-col items-center justify-center w-full h-fit bg-white border-2 border-blue-600 rounded-lg p-6'>
                             <InputField type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
@@ -138,7 +239,7 @@ export default function Signup() {
                             <InputField type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                             <Button name="Sign up" click={(e) => handleUserSingup(e)} />
                             <span className='text-black text-center my-4'>Already have an account? <a className='font-semibold text-blue-600' href="/login">Login</a></span>
-                            <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:text-blue-600 hover:bg-white" onClick={() => console.log('hello Google')}>Signup with <strong>Google</strong></button>
+                            <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:text-blue-600 hover:bg-white" onClick={() => googleAuthSignup()}>Signup with <strong>Google</strong></button>
                             {showError ? (
                                 <p className="mt-4 text-sm text-red-600 dark:text-red-400 text-center">{errorMessage}</p>
                             ) :
