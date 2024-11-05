@@ -179,9 +179,9 @@ function TaskManagement() {
   const [searchQuery, setSearchQuery] = useState('');
 
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  // const handleSearchChange = (event) => {
+  //   setSearchQuery(event.target.value);
+  // };
 
   const handleOptionClick = (option) => {
     setSelectedOption(option);
@@ -195,6 +195,7 @@ function TaskManagement() {
       task.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredTasks(filteredTasks);
+    setShowFilteredTasks(true);
   }, [searchQuery, originalTasks]);
 
   const sortTasks = (option) => {
@@ -277,7 +278,7 @@ function TaskManagement() {
                 placeholder="Search..."
                 className="border border-gray-300 rounded-md p-2 m-2 w-full"
                 value={searchQuery}
-                onChange={handleSearchChange}
+                onChange={e=>setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex flex-row items-center justify-start">
