@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { SERVER_URL } from '../config';
 import axios from 'axios';
+import close from '../assets/close.svg';
 
 const ItemType = {
     TASK: 'task',
@@ -55,6 +56,7 @@ function Modal({ task, onClose, type, modal, triggerFetch }) {
 
 
     const handleDelete = async () => {
+        setLoading(true);
         try {
             const response = await axios.delete(`${SERVER_URL}/task/delete/${task._id}`,{
                 headers: {
@@ -74,6 +76,8 @@ function Modal({ task, onClose, type, modal, triggerFetch }) {
     return (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 w-full h-full flex items-center justify-center z-50">
             <div ref={modalRef} className={`bg-white rounded-md shadow-lg w-3/4 ${type === 'delete' ? 'h-fit' : 'h-3/4'}  max-w-lg p-6 relative`}>
+            <div onClick={onClose}  className="flex absolute -right-4 -top-4 bg-white border shadow-lg border-white rounded-full p-2"> <img src={close} alt="close" className="w-6 h-6 cursor-pointer" /></div>
+
                 {type === 'view' && (
                     <div className='flex flex-col items-start w-full h-1/4'>
                         <h2 className="text-2xl font-bold mb-4">Task Details</h2>

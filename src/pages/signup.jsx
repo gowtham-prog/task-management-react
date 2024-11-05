@@ -40,7 +40,17 @@ export default function Signup() {
     // const { isAuthenticated } = useAuthentication();
     const location = useLocation();
 
-    const handleUserSingup = (e) => {
+    const logoutUser = async () => {
+        localStorage.clear();
+        sessionStorage.clear();
+    };
+
+
+    logoutUser().then(r => {
+        
+    })
+
+    const handleUserSignup = (e) => {
         e.preventDefault();
         submitForm();
     };
@@ -103,8 +113,6 @@ export default function Signup() {
             localStorage.setItem('user', user);
             isAuthenticated().then(r => {
             });
-            // fetchUserData(access).then(r => {
-            // })
 
             if (location.state !== null) {
                 navigate(location.state.path)
@@ -112,8 +120,8 @@ export default function Signup() {
                 navigate("/");
             }
         } catch (error) {
-            setErrorMessage("Invalid email or password")
-            setShowError(true)
+            // setErrorMessage("Invalid email or password")
+            // setShowError(true)
             throw error;
         }
     };
@@ -140,8 +148,8 @@ export default function Signup() {
         }
     };
 
-    const [ user, setUser ] = useState([]);
-    const [ profile, setProfile ] = useState([]);
+    const [ user, setUser ] = useState(null);
+    const [ profile, setProfile ] = useState(null);
 
     const googleAuthSignup = useGoogleLogin({
         onSuccess: (codeResponse) => setUser(codeResponse),
@@ -233,7 +241,7 @@ export default function Signup() {
                             <InputField type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                             <InputField type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                             <InputField type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-                            <Button name="Sign up" click={(e) => handleUserSingup(e)} />
+                            <Button name="Sign up" click={(e) => handleUserSignup(e)} />
                             <span className='text-black text-center my-4'>Already have an account? <a className='font-semibold text-blue-600' href="/login">Login</a></span>
                             <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:bg-blue-800" onClick={() => googleAuthSignup()}>Signup with <strong>Google</strong></button>
                             {showError ? (

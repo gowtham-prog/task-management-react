@@ -12,7 +12,6 @@ export default function TaskContainer({ status, tasks, moveTask, triggerFetch}) 
         accept: ItemType.TASK,
         drop(draggedItem) {
             console.log("dropped", draggedItem)
-            // Handle dropping into an empty container or a new container
             if (draggedItem.currentStatus !== status) {
                 moveTask(draggedItem.index, filteredTasks.length, status, draggedItem.currentStatus,draggedItem.id);
                 draggedItem.currentStatus = status;

@@ -36,6 +36,16 @@ export default function Login() {
     // const { isAuthenticated } = useAuthentication();
     const location = useLocation();
 
+    const logoutUser = async () => {
+        localStorage.clear();
+        sessionStorage.clear();
+    };
+
+    logoutUser().then(r => {
+        
+    })
+
+
     const handleUserLogin = (e) => {
         e.preventDefault();
         submitForm();
@@ -81,9 +91,7 @@ export default function Login() {
             localStorage.setItem('user', user);
             isAuthenticated().then(r => {
             });
-            // fetchUserData(access).then(r => {
-            // })
-
+            
             if (location.state !== null) {
                 navigate(location.state.path)
             } else {
@@ -119,8 +127,8 @@ export default function Login() {
     };
 
 
-    const [user, setUser] = useState([]);
-    const [profile, setProfile] = useState([]);
+    const [user, setUser] = useState(null);
+    const [profile, setProfile] = useState(null);
 
     const googleAuthLogin = useGoogleLogin({
         onSuccess: (codeResponse) => setUser(codeResponse),
@@ -159,7 +167,6 @@ export default function Login() {
 
                 } catch (loginError) {
                     if (loginError.response && loginError.response.status === 401) {
-                        // User does not exist, attempt to register
                         try {
                             const registerFormData = new FormData();
                             registerFormData.append('firstName', profile.given_name);
@@ -169,7 +176,6 @@ export default function Login() {
 
                             await registerUser(registerFormData);
 
-                            // Now try to login again
                             const loginFormData2 = new FormData();
                             loginFormData2.append('email', profile.email);
                             loginFormData2.append('password', profile.id);
@@ -182,7 +188,7 @@ export default function Login() {
                     } else {
                         console.error('Error while logging in user:', loginError?.response?.data?.message);
                         setShowError(true)
-                        setErrorMessage(loginError?.message|| loginError?.error || "Error while logging in user")
+                        setErrorMessage(loginError?.message || loginError?.error || "Error while logging in user")
                     }
                 }
             }
@@ -210,7 +216,7 @@ export default function Login() {
                             <InputField type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                             <Button name="Login" click={(e) => handleUserLogin(e)} />
                             <span className='text-black text-center my-4'>Don't have an account? <a className='font-semibold text-blue-600' href="/signup">Signup</a></span>
-                            <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:bg-blue-600 hover:bg-white" onClick={() => googleAuthLogin()}>Login with <strong>Google</strong></button>
+                            <button className="px-5 py-2 rounded-md w-fit text-white bg-blue-600 hover:bg-blue-800" onClick={() => googleAuthLogin()}>Login with <strong>Google</strong></button>
                             {showError ? (
                                 <p className="mt-4 text-sm text-red-600 dark:text-red-400 text-center">{errorMessage}</p>
                             ) :

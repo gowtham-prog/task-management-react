@@ -1,5 +1,6 @@
 import React, { useState, forwardRef } from "react";
 import InputField from "./inputField";
+import close from "../assets/close.svg";
 
 
 const AddTask = forwardRef((props, ref) => {
@@ -25,7 +26,6 @@ const AddTask = forwardRef((props, ref) => {
     const submitForm = async () => {
         setErrorMessage("");
         setShowError(false);
-        setLoading(true);
 
         if (taskTitle === "" || taskDescription === "" ) {
             setErrorMessage("All fields are Required");
@@ -40,6 +40,7 @@ const AddTask = forwardRef((props, ref) => {
         }
 
         try {
+            setLoading(true);
             const formData = new FormData();
             formData.append('name', taskTitle);
             formData.append('description', taskDescription);
@@ -55,7 +56,8 @@ const AddTask = forwardRef((props, ref) => {
 
 
     return (
-        <div ref={ref} className="flex z-40 flex-col bg-white shadow-lg rounded-lg w-full h-fit items-center justify-center m-2 max-w-3xl p-4">
+        <div ref={ref} className="flex relative z-40 flex-col bg-white shadow-lg rounded-lg w-full h-fit items-center justify-center m-2 max-w-3xl p-4">
+            <div onClick={props.closeModal}  className="flex absolute -right-4 -top-4 bg-white border shadow-lg border-white rounded-full p-2"> <img src={close} alt="close" className="w-6 h-6 cursor-pointer" /></div>
             <span className='text-3xl font-bold text-blue-600 text-left pb-8'>Add a new task</span>
             <InputField type="text" placeholder="Title" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} />
             <textarea placeholder="Description" value={taskDescription} className="w-full p-4 m-2 rounded-md border-2 border-gray-300 focus:outline-none focus:border-blue-600" onChange={(e) => setTaskDescription(e.target.value)} />
